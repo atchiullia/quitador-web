@@ -1,0 +1,7 @@
+flask
+pandas
+openpyxl
+gunicorn
+python-dateutil
+Flask-Session
+redis

@@ -1,0 +1,82 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg
+*.egg-info/
+*.pyo
+*.pyd
+*.pkl
+.Python
+.env
+.venv/
+venv/
+env/
+
+# Flask / Local config
+instance/
+*.db
+*.sqlite3
+*.log
+*.pid
+*.pem
+
+# VS Code / PyCharm / IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Docker
+*.tar
+*.img
+*.bak
+docker-compose.override.yaml
+.env.docker
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+terraform.tfvars
+terraform.tfvars.json
+crash.log
+
+# Node (caso use frontend)
+node_modules/
+npm-debug.log
+
+# Arquivos temporários
+.DS_Store
+Thumbs.db
+*.swp
+*.tmp
+
+# Sistema operacional
+ehthumbs.db
+Icon?
+Desktop.ini
+
+# Arquivos de build (caso use)
+dist/
+build/
+*.egg-info/
+
+# Excel gerado
+*.xlsx
+
+# Ignore output e arquivos locais
+*.out
+output/
+downloads/
+
+# Projeto específico
+/app/__pycache__/
+/tests/__pycache__/
