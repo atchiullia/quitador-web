@@ -10,6 +10,3 @@ Simulador de quitação de empréstimos com estratégia Snowball.
 - Pronto para CI/CD com GitHub Actions
 
 ## Como rodar localmente
-
-```bash
-docker-compose up --build
