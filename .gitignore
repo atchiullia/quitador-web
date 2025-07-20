@@ -29,6 +29,7 @@ instance/
 # pytest
 .pytest_cache/
 .coverage
+.coverage.*
 htmlcov/
 
 # Jupyter
@@ -38,7 +39,7 @@ htmlcov/
 *.tar
 *.img
 *.bak
-docker-compose.override.yaml
+docker-compose.override.yml
 .env.docker
 
 # Terraform
@@ -67,7 +68,6 @@ Desktop.ini
 # Arquivos de build (caso use)
 dist/
 build/
-*.egg-info/
 
 # Excel gerado
 *.xlsx
@@ -77,6 +77,6 @@ build/
 output/
 downloads/
 
-# Projeto específico
-/app/__pycache__/
-/tests/__pycache__/
+# Project-specific (optional, already covered above)
+#/app/__pycache__/
+#/tests/__pycache__/

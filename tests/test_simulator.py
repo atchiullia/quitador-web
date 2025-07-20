@@ -1,7 +1,7 @@
 import pytest
 import pandas as pd
 from datetime import datetime
-from app.simulator import simular_quitacao_snowball
+from app.services import simular_quitacao_snowball
 from app.models import Emprestimo
 
 

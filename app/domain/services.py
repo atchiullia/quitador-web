@@ -6,10 +6,12 @@ from .models import Emprestimo
 def simular_quitacao_snowball(
     emprestimos,
     aporte_fixo,
-    aporte_extra=0.0,
+    aporte_extra,
     inicio=datetime(2025, 8, 1),
     meses_maximos=120
 ):
+    aporte_fixo = float(aporte_fixo)
+    aporte_extra = float(aporte_extra)
     resultado = []
     extra_aporte = aporte_fixo
     emprestimos_ativos = emprestimos.copy()
@@ -22,12 +24,14 @@ def simular_quitacao_snowball(
 
         for emp in emprestimos_ativos:
             if emp.pago:
+                linha[f"{emp.nome} (Saldo)"] = 0
                 linha[emp.nome] = 0
                 continue
 
             juros = emp.saldo * emp.juros_mensal
             pagamento = emp.parcela
 
+            # Aporte extra vai para o primeiro não quitado
             if emp == next(e for e in emprestimos_ativos if not e.pago):
                 pagamento += extra_aporte + aporte_extra
 
@@ -37,11 +41,16 @@ def simular_quitacao_snowball(
                 pagamento = juros + amortizacao
 
             emp.saldo -= amortizacao
+            linha[f"{emp.nome} (Saldo)"] = round(emp.saldo, 2)
             linha[emp.nome] = round(pagamento, 2)
+            
             total_pago += pagamento
+
+            print(f"[{data_atual.strftime('%b %Y')}] {emp.nome} - Saldo Atual: {round(emp.saldo, 2)}")
 
             if emp.saldo <= 0.01:
                 emp.pago = True
+                emp.saldo = 0  # força zerar arredondamento
                 if emp.entra_no_aporte:
                     extra_aporte += emp.parcela
                 notas += f"{emp.nome} quitado. "
@@ -55,4 +64,4 @@ def simular_quitacao_snowball(
         if all(emp.pago for emp in emprestimos_ativos):
             break
 
-    return pd.DataFrame(resultado)
+    return pd.DataFrame(resultado) if resultado else pd.DataFrame()
