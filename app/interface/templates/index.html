@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <title>Simulador Snowball - Entrada Dinâmica</title>
+  <title>Simulador de Quitação Snowball</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   <script>
     function adicionarEmprestimo() {
@@ -11,33 +11,269 @@
       const div = document.createElement("div");
       div.className = "emprestimo-row";
       div.innerHTML = `
-        <input type="text" name="nome[]" placeholder="Nome do empréstimo" required />
-        <input type="number" step="0.01" min="0" name="saldo[]" placeholder="Saldo devedor" required />
-        <input type="number" step="0.01" min="0" name="parcela[]" placeholder="Parcela mensal" required />
-        <input type="number" step="0.01" min="0" name="juros[]" placeholder="Juros mensal (%)" required />
+        <input type="text" name="nome[]" placeholder="Nome do empréstimo" maxlength="50" required />
+        <input type="number" step="0.01" min="0.01" max="10000000" name="saldo[]" placeholder="Saldo devedor" required />
+        <input type="number" step="0.01" min="0.01" max="1000000" name="parcela[]" placeholder="Parcela mensal" required />
+        <input type="number" step="0.01" min="0.01" max="50" name="juros[]" placeholder="Juros mensal (%)" required />
         <button type="button" onclick="removerEmprestimo(this)">❌</button>
       `;
       container.appendChild(div);
+      
+      const inputs = div.querySelectorAll('input');
+      inputs.forEach(input => {
+        input.addEventListener('input', validarCampo);
+        input.addEventListener('blur', validarCampo);
+      });
     }
 
     function removerEmprestimo(button) {
       button.parentNode.remove();
     }
 
+    function validarCampo(event) {
+      const input = event.target;
+      const valor = parseFloat(input.value);
+      const nome = input.name;
+      
+      // Remover mensagem de erro anterior
+      const rowContainer = input.closest('.emprestimo-row') || input.parentNode;
+      const erroAnterior = rowContainer.querySelector('.erro-campo');
+      if (erroAnterior) {
+        erroAnterior.remove();
+      }
+      
+      let erro = '';
+      
+      if (nome === 'saldo[]') {
+        if (valor <= 0) {
+          erro = 'Saldo deve ser maior que zero';
+        } else if (valor > 10000000) {
+          erro = 'Saldo máximo é R$ 10.000.000,00';
+        }
+      } else if (nome === 'parcela[]') {
+        if (valor <= 0) {
+          erro = 'Parcela deve ser maior que zero';
+        } else if (valor > 1000000) {
+          erro = 'Parcela máxima é R$ 1.000.000,00';
+        }
+      } else if (nome === 'juros[]') {
+        if (valor <= 0) {
+          erro = 'Juros devem ser maiores que zero';
+        } else if (valor > 50) {
+          erro = 'Juros máximos são 50% ao mês';
+        }
+      } else if (nome === 'nome[]') {
+        if (input.value.length > 50) {
+          erro = 'Nome máximo 50 caracteres';
+        }
+      }
+      
+      if (erro) {
+        const erroElement = document.createElement('div');
+        erroElement.className = 'erro-campo';
+        erroElement.textContent = erro;
+        
+        // Adicionar ao final do container
+        rowContainer.appendChild(erroElement);
+        input.style.borderColor = 'red';
+      } else {
+        input.style.borderColor = '';
+      }
+    }
+
+    function validarFormulario() {
+      const emprestimos = document.querySelectorAll('.emprestimo-row');
+      const aporteFixo = parseFloat(document.getElementById('aporte_fixo').value) || 0;
+      const aporteExtra = parseFloat(document.getElementById('aporte_extra').value) || 0;
+      
+      let erros = [];
+      
+      if (emprestimos.length === 0) {
+        erros.push('Adicione pelo menos um empréstimo');
+      }
+      
+      if (aporteFixo < 0) {
+        erros.push('Aporte fixo não pode ser negativo');
+      }
+      if (aporteExtra < 0) {
+        erros.push('Aporte extra não pode ser negativo');
+      }
+      if (aporteFixo > 1000000) {
+        erros.push('Aporte fixo máximo é R$ 1.000.000,00');
+      }
+      if (aporteExtra > 1000000) {
+        erros.push('Aporte extra máximo é R$ 1.000.000,00');
+      }
+      
+      emprestimos.forEach((emprestimo, index) => {
+        const inputs = emprestimo.querySelectorAll('input');
+        const nome = inputs[0].value.trim();
+        const saldo = parseFloat(inputs[1].value);
+        const parcela = parseFloat(inputs[2].value);
+        const juros = parseFloat(inputs[3].value);
+        
+        if (!nome) {
+          erros.push(`Empréstimo ${index + 1}: Nome é obrigatório`);
+        }
+        if (!saldo || saldo <= 0) {
+          erros.push(`Empréstimo ${index + 1}: Saldo deve ser maior que zero`);
+        }
+        if (!parcela || parcela <= 0) {
+          erros.push(`Empréstimo ${index + 1}: Parcela deve ser maior que zero`);
+        }
+        if (!juros || juros <= 0) {
+          erros.push(`Empréstimo ${index + 1}: Juros devem ser maiores que zero`);
+        }
+        if (juros > 50) {
+          erros.push(`Empréstimo ${index + 1}: Juros máximos são 50% ao mês`);
+        }
+      });
+      
+      return erros;
+    }
+
+    function mostrarErros(erros) {
+      const erroExistente = document.querySelector('.erro-geral');
+      if (erroExistente) {
+        erroExistente.remove();
+      }
+      
+      if (erros.length > 0) {
+        mostrarModalErro(erros);
+        return false;
+      }
+      
+      return true;
+    }
+
+    function mostrarModalSucesso() {
+      const modal = document.getElementById('modal-sucesso');
+      modal.style.display = 'block';
+      
+      setTimeout(() => {
+        fecharModal('modal-sucesso');
+      }, 3000);
+    }
+
+    function mostrarModalErro(erros) {
+      const modal = document.getElementById('modal-erro');
+      const lista = document.getElementById('erro-lista-modal');
+      
+      lista.innerHTML = '';
+      erros.forEach(erro => {
+        const p = document.createElement('p');
+        p.textContent = erro;
+        p.className = 'erro-item';
+        lista.appendChild(p);
+      });
+      
+      modal.style.display = 'block';
+    }
+
+    function fecharModal(modalId) {
+      document.getElementById(modalId).style.display = 'none';
+    }
+
+    // Fechar modal ao clicar fora dele
+    window.onclick = function(event) {
+      const modals = document.querySelectorAll('.modal');
+      modals.forEach(modal => {
+        if (event.target === modal) {
+          modal.style.display = 'none';
+        }
+      });
+    }
+
     window.onload = () => {
-      adicionarEmprestimo(); // Inicia com 1 linha
+      adicionarEmprestimo();
+      
+      document.getElementById('simulacaoForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const erros = validarFormulario();
+        if (!mostrarErros(erros)) {
+          return false;
+        }
+        
+        const form = e.target;
+        const formData = new FormData(form);
+
+        try {
+          const response = await fetch('/', {
+            method: 'POST',
+            body: formData
+          });
+
+          const disposition = response.headers.get('Content-Disposition');
+          if (response.ok && disposition && disposition.includes('attachment')) {
+            const blob = await response.blob();
+            // Extrai o nome do arquivo do header, se possível
+            let filename = 'simulacao_snowball.xlsx';
+            const match = /filename="?([^"]+)"?/.exec(disposition);
+            if (match) filename = match[1];
+
+            // Cria link temporário para download
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+
+            // Mostra o modal de sucesso
+            mostrarModalSucesso();
+          } else {
+            // Erro: tenta ler JSON e mostrar modal de erro
+            let data;
+            try {
+              data = await response.json();
+            } catch {
+              data = { errors: ['Erro desconhecido ao processar a resposta.'] };
+            }
+            mostrarModalErro(data.errors || ['Erro desconhecido']);
+          }
+        } catch (error) {
+          mostrarModalErro(['Erro de conexão. Tente novamente.']);
+        }
+      });
+      
+      document.getElementById('aporte_fixo').addEventListener('input', validarAporte);
+      document.getElementById('aporte_extra').addEventListener('input', validarAporte);
+    }
+
+    function validarAporte(event) {
+      const input = event.target;
+      const valor = parseFloat(input.value) || 0;
+      
+      const erroAnterior = input.parentNode.querySelector('.erro-campo');
+      if (erroAnterior) {
+        erroAnterior.remove();
+      }
+      
+      let erro = '';
+      
+      if (valor < 0) {
+        erro = 'Valor não pode ser negativo';
+      } else if (valor > 1000000) {
+        erro = 'Valor máximo é R$ 1.000.000,00';
+      }
+      
+      if (erro) {
+        const erroElement = document.createElement('div');
+        erroElement.className = 'erro-campo';
+        erroElement.textContent = erro;
+        erroElement.style.color = 'red';
+        erroElement.style.fontSize = '12px';
+        erroElement.style.marginTop = '2px';
+        input.parentNode.appendChild(erroElement);
+        input.style.borderColor = 'red';
+      } else {
+        input.style.borderColor = '';
+      }
     }
   </script>
-  <style>
-    .emprestimo-row {
-      display: flex;
-      gap: 0.5rem;
-      margin-bottom: 0.5rem;
-    }
-    .emprestimo-row input {
-      flex: 1;
-    }
-  </style>
 </head>
 <body>
   <div class="container">
@@ -51,7 +287,7 @@
         </ul>
       {% endif %}
     {% endwith %}
-    <form method="POST">
+    <form id="simulacaoForm" method="POST">
       <fieldset>
         <legend>Empréstimos</legend>
         <div id="emprestimos-container"></div>
@@ -59,13 +295,39 @@
       </fieldset>
 
       <label for="aporte_fixo">Aporte Fixo Inicial (ex: 1127):</label>
-      <input type="text" id="aporte_fixo" name="aporte_fixo" placeholder="0" value="0" required />
+      <input type="number" step="0.01" min="0" max="1000000" id="aporte_fixo" name="aporte_fixo" placeholder="0" value="0" required />
 
       <label for="aporte_extra">Aporte Extra Mensal (ex: 500):</label>
-      <input type="text" id="aporte_extra" name="aporte_extra" placeholder="0" value="0" required />
+      <input type="number" step="0.01" min="0" max="1000000" id="aporte_extra" name="aporte_extra" placeholder="0" value="0" required />
 
       <button type="submit">Simular e Baixar Excel</button>
     </form>
+  </div>
+
+  <!-- Modal de Sucesso -->
+  <div id="modal-sucesso" class="modal">
+    <div class="modal-content success-modal">
+      <span class="close" onclick="fecharModal('modal-sucesso')">&times;</span>
+      <div class="modal-body">
+        <div class="success-icon">✅</div>
+        <h3>Excel Gerado com Sucesso!</h3>
+        <p>O arquivo foi baixado automaticamente.</p>
+        <p>Verifique sua pasta de downloads.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Erro -->
+  <div id="modal-erro" class="modal">
+    <div class="modal-content error-modal">
+      <span class="close" onclick="fecharModal('modal-erro')">&times;</span>
+      <div class="modal-body">
+        <div class="error-icon">❌</div>
+        <h3>Erro na Simulação</h3>
+        <div id="erro-lista-modal"></div>
+        <button class="btn-ok" onclick="fecharModal('modal-erro')">OK</button>
+      </div>
+    </div>
   </div>
 </body>
 </html>

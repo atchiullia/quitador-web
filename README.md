@@ -3,10 +3,37 @@
 **Quitador Web** is a professional, modular web application for simulating loan payoff strategies using the Snowball method.  
 It is built with Flask, follows Clean Architecture and DDD principles, and supports Dockerized deployment with Redis-backed sessions.
 
+## Features
+
+- **Dynamic Loan Input:** Add or remove multiple loans with custom names, balances, installments, and interest rates.
+- **Field Validation:** Both frontend and backend validations for all fields (limits, required, etc).
+- **Snowball Strategy Simulation:** Calculates the optimal repayment order to minimize interest.
+- **Excel Export:** Download a detailed repayment schedule in Excel format.
+- **Success & Error Modals:** User feedback via modals for both successful downloads and errors.
+- **Robust Error Handling:** All errors (validation, business logic, unexpected) are shown in modals.
+- **Environment Variables:** Sensitive data like `SECRET_KEY` is loaded from environment variables using `python-dotenv`.
+- **Logging:** Centralized logging for easier debugging and monitoring.
+- **API Documentation:** Swagger UI available for API exploration (if enabled).
 ---
 
-## 🚀 Features
+## Getting Started
 
+### 1. **Clone the repository**
+```bash
+git clone https://github.com/youruser/quitador-web.git
+cd quitador-web
+```
+
+### 2. **Create and activate a virtual environment**
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### 3. **Install dependencies**
+```bash
+pip install -r requirements.txt
+```
 - **Dynamic Web Form:** Add multiple loans dynamically via the web interface.
 - **Snowball Strategy Simulation:** Simulate loan payoff with fixed and extra contributions.
 - **Excel Export:** Download the simulation result as an Excel spreadsheet.
@@ -14,6 +41,9 @@ It is built with Flask, follows Clean Architecture and DDD principles, and suppo
 - **Dockerized:** Ready for containerized deployment with Redis support.
 - **Production-Ready:** Easily deployable on any server or cloud with Docker.
 - **CI/CD Ready:** Designed for integration with GitHub Actions and other CI/CD tools.
+
+### 4. **Set up environment variables**
+Create a `.env` file in the project root:
 
 ---
 
