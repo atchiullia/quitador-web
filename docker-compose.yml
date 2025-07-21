@@ -5,12 +5,10 @@ services:
       - "6379:6379"
 
   web:
-    image: atchiullia/quitador-web:v7
+    image: atchiullia/quitador-web:v8
     environment:
-      - FLASK_ENV=development
       - REDIS_HOST=redis
-      - FLASK_APP=app.interface:create_app
     ports:
-      - "5001:5001"
+      - "80:80"
     depends_on:
       - redis

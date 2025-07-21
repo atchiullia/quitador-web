@@ -1,30 +1,25 @@
-# Imagem base slim (menor, mais portável)
-FROM python:3.11.8-slim-bullseye
+FROM alpine:3.19
 
-# Evita input interativo e mensagens pip
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1
+# Ensure 'python' points to 'python3'
+RUN apk add --no-cache python3 py3-pip build-base libffi-dev rust cargo curl
 
 WORKDIR /app
 
-# Instala dependências do sistema mínimas
-RUN apt-get update && apt-get upgrade -y && apt-get install -y \
-    build-essential \
-    libpq-dev \
-    curl \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-# Instala dependências Python
+# Copy requirements first, then install dependencies in venv
 COPY requirements.txt .
-RUN pip install --upgrade pip && pip install -r requirements.txt
+RUN python3 -m venv /venv \
+    && . /venv/bin/activate \
+    && pip install --upgrade pip setuptools==78.1.1\
+    && pip install -r requirements.txt
 
-# Copia o restante do código
+# Now copy the rest of the code
 COPY . .
 
-# Expõe a porta do Gunicorn
-EXPOSE 5001
+# Expose the Gunicorn port
+EXPOSE 80
 
-# Comando de inicialização com Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:5001", "app.interface:create_app()"]
+# Use the venv's python/pip/gunicorn
+ENV PATH="/venv/bin:$PATH"
+
+# Gunicorn command to start the application
+CMD ["gunicorn", "--bind", "0.0.0.0:80", "app.interface:create_app()"]
